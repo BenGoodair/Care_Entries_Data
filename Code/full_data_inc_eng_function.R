@@ -1,4 +1,4 @@
-create_home_data <- function(){
+create_characteristics_data <- function(){
   
   if (!require("pacman")) install.packages("pacman")
   
