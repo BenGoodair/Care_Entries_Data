@@ -5,7 +5,8 @@ pacman::p_load(devtools,np,lazyeval, hmisc,interp, lmtest,gt, modelsummary, dply
 
 
 ####Data####
-
+source("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Code/full_data_inc_eng_function.R")
+characteristics <- create_characteristics_data()
 
 dplyr::mutate(LA_Name = LA_Name %>%
                 gsub('&', 'and', .) %>%
@@ -27,7 +28,7 @@ dplyr::mutate(LA_Name = LA_Name %>%
 
 df_raw <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/refs/heads/main/Final_Data/outputs/dashboard_data.csv"))
 
-df <- df_raw %>%
+df <- characteristics %>%
   dplyr::filter(category=="started during")
 
 

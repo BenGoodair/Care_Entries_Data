@@ -11,7 +11,7 @@ create_characteristics_data <- function(){
   
   leave_acc <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_care_leavers_accommodation_suitability.csv"),
                          colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>%  mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
    # dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -27,7 +27,7 @@ create_characteristics_data <- function(){
   
   leave_acctype <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_care_leavers_accommodation_type.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
   #  dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -44,7 +44,7 @@ create_characteristics_data <- function(){
   
   leave_activity <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_care_leavers_activity.csv"),
                               colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
   #  dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -59,7 +59,7 @@ create_characteristics_data <- function(){
   
   leave_intouch <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_care_leavers_intouch.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
   #  dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -75,7 +75,7 @@ create_characteristics_data <- function(){
   
   leave_stayput <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_care_leavers_stayput.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
   #  dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -91,7 +91,7 @@ create_characteristics_data <- function(){
   
   shortterm <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_children_looked_after_exclusively_under_a_series_of_short_term_placements.csv"),
                          colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
    # dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period,
                   percent=NA)%>%
@@ -107,8 +107,8 @@ create_characteristics_data <- function(){
   
   adopted_during <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_children_who_ceased_during_the_year_sgo_adoption.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
-##    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
+#        dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period,
                   variable =  ifelse(characteristic == "Total", paste(cla_group, "_", characteristic, sep = ""), characteristic))%>%
     dplyr::rename(LA_Name= la_name,
@@ -124,7 +124,7 @@ create_characteristics_data <- function(){
   
   ceased_during <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_children_who_ceased_during_the_year.csv"),
                             colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -141,7 +141,7 @@ create_characteristics_data <- function(){
   
   missing <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_children_who_were_missing_or_away_from_placement_without_authorisation.csv"),
                       colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period,
                   percent = NA)%>%
@@ -158,7 +158,7 @@ create_characteristics_data <- function(){
   
   stability <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_cla_placement_stability.csv"),
                         colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -174,7 +174,7 @@ create_characteristics_data <- function(){
   
   new_placements <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_cla_during_year_new_placements.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -190,7 +190,7 @@ create_characteristics_data <- function(){
   
   char <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_cla_on_31_march_by_characteristics.csv"),
                    colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -207,7 +207,7 @@ create_characteristics_data <- function(){
   
   started_during <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_children_who_started_to_be_looked_after_during_the_year.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -222,7 +222,7 @@ create_characteristics_data <- function(){
   
   net_gain <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_cla_on_31_march_la_of_placement_netgain.csv"),
                        colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -238,7 +238,7 @@ create_characteristics_data <- function(){
   
   school_moves <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/official_statistics_la_cla_school_moves.csv"),
                            colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -264,7 +264,7 @@ create_characteristics_data <- function(){
   
   leave_acc <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_care_leavers_accommodation_suitability.csv"),
                          colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -280,7 +280,7 @@ create_characteristics_data <- function(){
   
   leave_acctype <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_care_leavers_accommodation_type.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -297,7 +297,7 @@ create_characteristics_data <- function(){
   
   leave_activity <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_care_leavers_activity.csv"),
                               colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -312,7 +312,7 @@ create_characteristics_data <- function(){
   
   leave_intouch <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_care_leavers_intouch.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -328,7 +328,7 @@ create_characteristics_data <- function(){
   
   leave_stayput <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_care_leavers_stayput.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -344,7 +344,7 @@ create_characteristics_data <- function(){
   
   shortterm <-  read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_children_looked_after_exclusively_under_a_series_of_short_term_placements.csv"),
                          colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period,
                   percent=NA)%>%
@@ -360,7 +360,7 @@ create_characteristics_data <- function(){
   
   adopted_during <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_children_who_ceased_during_the_year_sgo_adoptions.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period,
                   variable =  ifelse(characteristic == "Total", paste(cla_group, "_", characteristic, sep = ""), characteristic))%>%
@@ -377,7 +377,7 @@ create_characteristics_data <- function(){
   
   ceased_during <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_children_who_ceased_during_year.csv"),
                             colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -394,7 +394,7 @@ create_characteristics_data <- function(){
   
   missing <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_children_who_were_missing_or_away_from_placement_without_authorisation.csv"),
                       colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period,
                   percent = NA)%>%
@@ -411,7 +411,7 @@ create_characteristics_data <- function(){
   
   stability <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_cla_at_31_march_placement_stability_indicator.csv"),
                         colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -427,7 +427,7 @@ create_characteristics_data <- function(){
   
   new_placements <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_cla_during_year_new_placements.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -443,7 +443,7 @@ create_characteristics_data <- function(){
   
   char <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_cla_on_31_march_by_characteristics.csv"),
                    colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -460,7 +460,7 @@ create_characteristics_data <- function(){
   
   started_during <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_cla_who_started_to_be_looked_after.csv"),
                              colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -475,7 +475,7 @@ create_characteristics_data <- function(){
   
   net_gain <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/la_cla_on_31_march_la_of_placement_net_gain.csv"),
                        colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
@@ -491,7 +491,7 @@ create_characteristics_data <- function(){
   
   school_moves <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017/data/official_statistics_la_cla_school_moves.csv"),
                            colClasses = "character")%>%
-    dplyr::mutate_all(~ str_replace(., ",", ""))%>%
+    dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
     dplyr::mutate(year = time_period)%>%
     dplyr::rename(LA_Name= la_name,
