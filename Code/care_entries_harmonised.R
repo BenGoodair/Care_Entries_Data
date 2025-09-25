@@ -243,8 +243,8 @@ popcheck <- full_join(pop_utla,
               dplyr::mutate(keep="keep"))%>%
   dplyr::filter(keep=="keep")
 
-regionlookup <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/Local_Authority_District_(December_2018)_to_NUTS3_to_NUTS2_to_NUTS1_(January_2018)_Lookup_in_United_Kingdom.csv"))%>%
-  dplyr::mutate(ltla_Name = LAD18NM %>%
+regionlookup <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/Local_Authority_District_(April_2023)_to_LAU1_to_ITL3_to_ITL2_to_ITL1_(January_2021)Lookup.csv"))%>%
+  dplyr::mutate(ltla_Name = LAD23NM %>%
                   gsub('&', 'and', .) %>%
                   gsub('[[:punct:] ]+', ' ', .) %>%
                   gsub('[0-9]', '', .)%>%
@@ -263,11 +263,11 @@ regionlookup <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care
 
 
 pop_reg <- full_join(pop, regionlookup)%>%
-  dplyr::select(NUTS118NM, age_group, pop_sum, year)%>%
-  dplyr::group_by(age_group, year, NUTS118NM )%>%
+  dplyr::select(ITL121NM, age_group, pop_sum, year)%>%
+  dplyr::group_by(age_group, year, ITL121NM )%>%
   dplyr::summarise(pop_sum = sum(pop_sum))%>%
   dplyr::ungroup()%>%
-  dplyr::mutate(LA_Name = NUTS118NM %>%
+  dplyr::mutate(LA_Name = ITL121NM %>%
                   gsub('&', 'and', .) %>%
                   gsub('[[:punct:] ]+', ' ', .) %>%
                   gsub('[0-9]', '', .)%>%
@@ -282,7 +282,11 @@ pop_reg <- full_join(pop, regionlookup)%>%
                   gsub("AND DARWEN", "WITH DARWEN", .)%>%
                   gsub("NE SOM", "NORTH EAST SOM", .)%>%
                   gsub("N E SOM", "NORTH EAST SOM", .)%>%
-                  str_trim())
+                  str_trim())%>%
+  dplyr::select(-ITL121NM)%>%
+  dplyr::filter(LA_Name!="LONDON",
+                LA_Name!="SCOTLAND",
+                LA_Name!="WALES")
 
 
 
