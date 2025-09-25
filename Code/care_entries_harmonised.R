@@ -51,7 +51,7 @@ df <- characteristics %>%
 
     
     
-rural <-     read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/00546ccef58bb7531f75b5b3b378b562af503b4b/Raw_Data/LA_level/Economic_Political_Contextual/17_10_2023_-_Rural-Urban_Classification_2011_lookup_tables_for_higher_level_geographies.csv"), skip=3)%>%
+rural <-read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/00546ccef58bb7531f75b5b3b378b562af503b4b/Raw_Data/LA_level/Economic_Political_Contextual/17_10_2023_-_Rural-Urban_Classification_2011_lookup_tables_for_higher_level_geographies.csv"), skip=3)%>%
               dplyr::mutate(LA_Name = Upper.Tier.Local.Authority.Area.2021.Name %>%
                               gsub('&', 'and', .) %>%
                               gsub('[[:punct:] ]+', ' ', .) %>%
@@ -68,7 +68,52 @@ rural <-     read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childre
                               gsub("NE SOM", "NORTH EAST SOM", .)%>%
                               gsub("N E SOM", "NORTH EAST SOM", .)%>%
                               gsub("COUNTY DURHAM", "DURHAM", .)%>%
-                              str_trim())
+                              str_trim())%>%
+  dplyr::filter(LA_Name!="")%>%
+  dplyr::select(-Upper.Tier.Local.Authority.Area.2021.Name)%>%
+  dplyr::rename(LA_Code = Upper.Tier.Local.Authority.Area.2021.Code)%>%
+  tidyr::pivot_longer(cols = c('Rural.Urban.Classification.2011..6.fold.', 'Rural.Urban.Classification.2011..3.fold.'), names_to = "variable", values_to = "number")%>%
+  dplyr::mutate(LA.Number = NA,
+                category = "Area variables",
+                subcategory = "Rurality",
+                percent= NA)%>%
+  crossing(year = 2010:2024)
+
+idaci <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/idacilarge.csv"))%>%
+  dplyr::rename(LA_Code = LAD19CD)%>%
+  dplyr::left_join(df %>% dplyr::select(LA_Name, LA_Code)%>% dplyr::distinct(.keep_all = T)%>%dplyr::filter(!is.na(LA_Code)))%>%
+  tidyr::pivot_longer(cols = c('IDACI...Average.rank', 'IDACI...Average.score', 'IDACI...Proportion..of.LSOAs.in.most.deprived.10..nationally'), names_to = "variable", values_to = "number")%>%
+  dplyr::mutate(LA.Number = NA,
+                category = "Area variables",
+                subcategory = "Deprivation affecting children",
+                percent= NA)%>%
+  crossing(year = 2010:2024)
+
+
+pop2 <- read_csv(
+  curl::curl("https://raw.githubusercontent.com/BenGoodair/care_home_mortality/refs/heads/main/Data/myebtablesenglandwales20112023%20(3).csv"),
+  skip = 1,
+  col_types = cols(.default = "c")
+) %>%
+  clean_names() %>%
+  rename(
+    lad_code  = ladcode23,
+    geography = laname23
+  ) %>%
+  pivot_longer(
+    cols = starts_with("population_"),
+    names_to  = "year",
+    names_prefix = "population_",
+    values_to = "pop"
+  ) %>%
+  mutate(
+    year = as.integer(year),
+    age  = as.integer(age),
+    pop  = as.integer(pop)
+  )%>%
+  dplyr::select(year,age,lad_code,geography,pop)
+
+  
   
 
 
