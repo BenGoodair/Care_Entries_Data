@@ -90,8 +90,50 @@ idaci <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entrie
   crossing(year = 2010:2024)
 
 
+pop1 <- read_csv(
+  curl::curl("https://raw.githubusercontent.com/BenGoodair/care_home_mortality/refs/heads/main/Data/myebtablesewsn20012011.csv"),
+  skip = 1,        # drop the first metadata row
+  col_types = cols(.default = "c")
+) %>%
+  clean_names() %>%
+  rename(
+    lad_code  = ladcode18,
+    geography = laname18
+  ) %>%
+  # pick off only age & the "population_YYYY" cols
+  pivot_longer(
+    cols = starts_with("population_"),
+    names_to  = "year",
+    names_prefix = "population_",
+    values_to = "pop"
+  ) %>%
+  mutate(
+    year = as.integer(year),
+    age  = as.integer(age),
+    pop = as.integer(gsub(",", "", pop))
+    )%>%
+  dplyr::select(year,age,lad_code,geography,pop)%>%
+  dplyr::filter(year==2010)
+
+pop1 <- pop1 %>%
+  mutate(age_group = case_when(
+    age < 5 ~ "Under 5",
+    age >= 5 & age <= 15 ~ "5–15",
+    age >= 16 & age <= 18 ~ "16–18"
+  )) %>%
+  group_by(year, lad_code, geography, age_group) %>%
+  summarise(pop_sum = sum(pop), .groups = "drop") %>%
+  bind_rows(
+    pop1 %>%
+      filter(age < 18) %>%
+      group_by(year, lad_code, geography) %>%
+      summarise(pop_sum = sum(pop), .groups = "drop") %>%
+      mutate(age_group = "Under 18")
+  ) %>%
+  arrange(year, lad_code, age_group)
+
 pop2 <- read_csv(
-  curl::curl("https://raw.githubusercontent.com/BenGoodair/care_home_mortality/refs/heads/main/Data/myebtablesenglandwales20112023%20(3).csv"),
+  curl::curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/myebtablesenglandwales20112024.csv"),
   skip = 1,
   col_types = cols(.default = "c")
 ) %>%
@@ -109,12 +151,59 @@ pop2 <- read_csv(
   mutate(
     year = as.integer(year),
     age  = as.integer(age),
-    pop  = as.integer(pop)
-  )%>%
+    pop = as.integer(gsub(",", "", pop))
+    )%>%
   dplyr::select(year,age,lad_code,geography,pop)
 
-  
-  
+
+pop2 <- pop2 %>%
+  mutate(age_group = case_when(
+    age < 5 ~ "Under 5",
+    age >= 5 & age <= 15 ~ "5–15",
+    age >= 16 & age <= 18 ~ "16–18"
+  )) %>%
+  group_by(year, lad_code, geography, age_group) %>%
+  summarise(pop_sum = sum(pop), .groups = "drop") %>%
+  bind_rows(
+    pop2 %>%
+      filter(age < 18) %>%
+      group_by(year, lad_code, geography) %>%
+      summarise(pop_sum = sum(pop), .groups = "drop") %>%
+      mutate(age_group = "Under 18")
+  ) %>%
+  arrange(year, lad_code, age_group)
+
+pop <- rbind(pop1, pop2)%>%
+  dplyr::filter(!is.na(age_group))%>%
+  dplyr::mutate(LA_Name = geography %>%
+                  gsub('&', 'and', .) %>%
+                  gsub('[[:punct:] ]+', ' ', .) %>%
+                  gsub('[0-9]', '', .)%>%
+                  toupper() %>%
+                  gsub("CITY OF", "",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("COUNTY OF", "",.)%>%
+                  gsub("ROYAL BOROUGH OF", "",.)%>%
+                  gsub("LEICESTER CITY", "LEICESTER",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("DARWIN", "DARWEN", .)%>%
+                  gsub("AND DARWEN", "WITH DARWEN", .)%>%
+                  gsub("NE SOM", "NORTH EAST SOM", .)%>%
+                  gsub("N E SOM", "NORTH EAST SOM", .)%>%
+                  gsub("COUNTY DURHAM", "DURHAM", .)%>%
+                  str_trim())
+
+
+
+pop <- full_join(pop,
+                 df %>%dplyr::select(LA_Name)%>%
+                   dplyr::distinct(.keep_all = T)%>%
+                   dplyr::mutate(keep="keep"))%>%
+  dplyr::filter(keep=="keep")
+
+
+UT LOOKUP CUNT
+
 
 
 
