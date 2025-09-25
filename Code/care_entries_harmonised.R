@@ -44,8 +44,8 @@ df <- characteristics %>%
                   gsub("N E SOM", "NORTH EAST SOM", .)%>%
                   str_trim())%>%
   dplyr::filter(category=="started during")%>%
-  dplyr::mutate(LA_Name = ifelse(LA_Name=="England", "England_current_year_reporting", LA_Name))
-
+  dplyr::mutate(LA_Name = ifelse(LA_Name=="ENGLAND", "England_current_year_reporting", LA_Name))%>%
+  dplyr::mutate(LA_Name = ifelse(LA_Name=="DURHAM", "COUNTY DURHAM", LA_Name))
 
 
 
@@ -175,7 +175,7 @@ pop2 <- pop2 %>%
 
 pop <- rbind(pop1, pop2)%>%
   dplyr::filter(!is.na(age_group))%>%
-  dplyr::mutate(LA_Name = geography %>%
+  dplyr::mutate(ltla_Name = geography %>%
                   gsub('&', 'and', .) %>%
                   gsub('[[:punct:] ]+', ' ', .) %>%
                   gsub('[0-9]', '', .)%>%
@@ -190,19 +190,116 @@ pop <- rbind(pop1, pop2)%>%
                   gsub("AND DARWEN", "WITH DARWEN", .)%>%
                   gsub("NE SOM", "NORTH EAST SOM", .)%>%
                   gsub("N E SOM", "NORTH EAST SOM", .)%>%
-                  gsub("COUNTY DURHAM", "DURHAM", .)%>%
+                  str_trim())
+
+utlalookup <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/Local_Authority_District_to_County_and_Unitary_Authority_(April_2023)_Lookup_in_EW.csv"))%>%
+  dplyr::mutate(ltla_Name = LTLA23NM %>%
+                  gsub('&', 'and', .) %>%
+                  gsub('[[:punct:] ]+', ' ', .) %>%
+                  gsub('[0-9]', '', .)%>%
+                  toupper() %>%
+                  gsub("CITY OF", "",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("COUNTY OF", "",.)%>%
+                  gsub("ROYAL BOROUGH OF", "",.)%>%
+                  gsub("LEICESTER CITY", "LEICESTER",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("DARWIN", "DARWEN", .)%>%
+                  gsub("AND DARWEN", "WITH DARWEN", .)%>%
+                  gsub("NE SOM", "NORTH EAST SOM", .)%>%
+                  gsub("N E SOM", "NORTH EAST SOM", .)%>%
+                  str_trim())
+  
+
+
+pop_utla <- full_join(pop, utlalookup)%>%
+  dplyr::select(UTLA23NM,UTLA23CD, age_group, pop_sum, year)%>%
+  dplyr::group_by(age_group, year, UTLA23NM,UTLA23CD )%>%
+  dplyr::summarise(pop_sum = sum(pop_sum))%>%
+  dplyr::ungroup()%>%
+  dplyr::mutate(LA_Name = UTLA23NM %>%
+                  gsub('&', 'and', .) %>%
+                  gsub('[[:punct:] ]+', ' ', .) %>%
+                  gsub('[0-9]', '', .)%>%
+                  toupper() %>%
+                  gsub("CITY OF", "",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("COUNTY OF", "",.)%>%
+                  gsub("ROYAL BOROUGH OF", "",.)%>%
+                  gsub("LEICESTER CITY", "LEICESTER",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("DARWIN", "DARWEN", .)%>%
+                  gsub("AND DARWEN", "WITH DARWEN", .)%>%
+                  gsub("NE SOM", "NORTH EAST SOM", .)%>%
+                  gsub("N E SOM", "NORTH EAST SOM", .)%>%
                   str_trim())
 
 
 
-pop <- full_join(pop,
+
+popcheck <- full_join(pop_utla,
+            df %>%dplyr::select(LA_Name)%>%
+              dplyr::distinct(.keep_all = T)%>%
+              dplyr::mutate(keep="keep"))%>%
+  dplyr::filter(keep=="keep")
+
+regionlookup <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/Local_Authority_District_(December_2018)_to_NUTS3_to_NUTS2_to_NUTS1_(January_2018)_Lookup_in_United_Kingdom.csv"))%>%
+  dplyr::mutate(ltla_Name = LAD18NM %>%
+                  gsub('&', 'and', .) %>%
+                  gsub('[[:punct:] ]+', ' ', .) %>%
+                  gsub('[0-9]', '', .)%>%
+                  toupper() %>%
+                  gsub("CITY OF", "",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("COUNTY OF", "",.)%>%
+                  gsub("ROYAL BOROUGH OF", "",.)%>%
+                  gsub("LEICESTER CITY", "LEICESTER",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("DARWIN", "DARWEN", .)%>%
+                  gsub("AND DARWEN", "WITH DARWEN", .)%>%
+                  gsub("NE SOM", "NORTH EAST SOM", .)%>%
+                  gsub("N E SOM", "NORTH EAST SOM", .)%>%
+                  str_trim())
+
+
+pop_reg <- full_join(pop, regionlookup)%>%
+  dplyr::select(NUTS118NM, age_group, pop_sum, year)%>%
+  dplyr::group_by(age_group, year, NUTS118NM )%>%
+  dplyr::summarise(pop_sum = sum(pop_sum))%>%
+  dplyr::ungroup()%>%
+  dplyr::mutate(LA_Name = NUTS118NM %>%
+                  gsub('&', 'and', .) %>%
+                  gsub('[[:punct:] ]+', ' ', .) %>%
+                  gsub('[0-9]', '', .)%>%
+                  toupper() %>%
+                  gsub("CITY OF", "",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("COUNTY OF", "",.)%>%
+                  gsub("ROYAL BOROUGH OF", "",.)%>%
+                  gsub("LEICESTER CITY", "LEICESTER",.)%>%
+                  gsub("UA", "",.)%>%
+                  gsub("DARWIN", "DARWEN", .)%>%
+                  gsub("AND DARWEN", "WITH DARWEN", .)%>%
+                  gsub("NE SOM", "NORTH EAST SOM", .)%>%
+                  gsub("N E SOM", "NORTH EAST SOM", .)%>%
+                  str_trim())
+
+
+
+
+
+pop <- 
+  
+  
+  
+  
+  full_join(pop,
                  df %>%dplyr::select(LA_Name)%>%
                    dplyr::distinct(.keep_all = T)%>%
                    dplyr::mutate(keep="keep"))%>%
   dplyr::filter(keep=="keep")
 
 
-UT LOOKUP CUNT
 
 
 
