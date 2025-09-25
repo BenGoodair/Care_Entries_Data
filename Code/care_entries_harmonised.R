@@ -29,7 +29,6 @@ df <- characteristics %>%
                   gsub("N E SOM", "NORTH EAST SOM", .)%>%
                   str_trim())%>%
   dplyr::filter(category=="started during")%>%
-  dplyr::mutate(LA_Name = ifelse(LA_Name=="ENGLAND", "England_current_year_reporting", LA_Name))%>%
   dplyr::mutate(LA_Name = ifelse(LA_Name=="DURHAM", "COUNTY DURHAM", LA_Name),
                 LA_Name = ifelse(LA.Number=="201", "CITY OF LONDON", LA_Name))
 
@@ -159,6 +158,22 @@ pop <- rbind(pop1, pop2)%>%
                   gsub("N E SOM", "NORTH EAST SOM", .)%>%
                   str_trim())%>%
   dplyr::filter(grepl("^E", lad_code))
+
+england_rows <- pop %>%
+  dplyr::group_by(year, age_group, sex) %>%
+  dplyr::summarise(pop_sum = sum(pop_sum, na.rm = TRUE), .groups = "drop") %>%
+  dplyr::mutate(
+    sex = toupper(sex),
+    sex = dplyr::case_when(
+      sex == "M"   ~ "Male",
+      sex == "F"   ~ "Female",
+      sex == "ALL" ~ "Total",
+      TRUE         ~ NA_character_
+    ),
+    LA_Name = "ENGLAND"
+  ) %>%
+  dplyr::select(LA_Name, age_group, pop_sum, year, sex)
+
   
 
 utlalookup <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/Local_Authority_District_to_County_and_Unitary_Authority_(April_2023)_Lookup_in_EW.csv"))%>%
@@ -276,7 +291,7 @@ pop <- rbind(pop_utla, pop_reg)%>%
 
 
 
-
+pop <- rbind(pop, england_rows)
 
 
 pop <- pop %>%
@@ -379,5 +394,51 @@ area <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries
   final_df <- bind_rows(final_df, dens)%>%
     dplyr::select(LA_Name, year, category, subcategory, variable, number, percent)
   
+  
+  
+eng_harm <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/historic_eng.csv"))%>%
+  dplyr::rename(year = time_period,
+                LA_Name = country_name,
+                variable = population_count)%>%
+  dplyr::mutate(percent = NA,
+                category = "Harmonisation data",
+                subcategory = "new_children_england",
+                year = as.character(year),
+                number = as.character(number),
+                LA_Name = toupper(LA_Name))%>%
+  dplyr::select(LA_Name, year, category, subcategory, variable, number, percent)
 
+final_df <- bind_rows(final_df, eng_harm)%>%
+  dplyr::select(LA_Name, year, category, subcategory, variable, number, percent)
+
+
+
+regions <- c(
+  "NORTH EAST",
+  "NORTH WEST",
+  "YORKSHIRE AND THE HUMBER",
+  "EAST MIDLANDS",
+  "WEST MIDLANDS",
+  "EAST OF ENGLAND",
+  "LONDON",
+  "SOUTH EAST",
+  "SOUTH WEST"
+)
+
+final_df <- final_df %>%
+  dplyr::rename(geography_name = LA_Name) %>%
+  dplyr::mutate(
+    geography_scale = dplyr::case_when(
+      geography_name == "ENGLAND" ~ "NATIONAL",
+      geography_name %in% regions ~ "REGIONAL",
+      TRUE ~ "LOCAL AUTHORITY"
+    )
+  ) 
+
+
+final_df <- final_df %>%
+dplyr::select(geography_name, year, geography_scale, category, subcategory, variable, number, percent)
+
+
+closures <-   read.csv("~/Library/CloudStorage/OneDrive-Nexus365/Documents/Children's Care Homes Project/CQC_API_Materials/Data/complete inspection and location data_ben_feb2025v2.csv")%>%
 
