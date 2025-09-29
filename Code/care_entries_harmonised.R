@@ -422,7 +422,9 @@ regions <- c(
   "EAST OF ENGLAND",
   "LONDON",
   "SOUTH EAST",
-  "SOUTH WEST"
+  "SOUTH WEST",
+  "INNER LONDON",
+  "OUTER LONDON"
 )
 
 final_df <- final_df %>%
@@ -439,6 +441,27 @@ final_df <- final_df %>%
 final_df <- final_df %>%
 dplyr::select(geography_name, year, geography_scale, category, subcategory, variable, number, percent)
 
+rejig <- final_df%>%
+  filter(subcategory == "Age group") %>%
+  mutate(variable = case_when(
+    grepl("Under 1|1 to 4", variable) ~ "Under 5",
+    grepl("5 to 9|10 to 15", variable) ~ "5–15",
+    grepl("16 years", variable) ~ "16–18",
+    variable == "Total" ~ "Total",
+    TRUE ~ NA_character_
+  )) %>%
+  # Sum numbers and percents by the new categories
+  group_by(geography_name, year, geography_scale, category,subcategory, variable) %>%
+  summarise(
+    number = sum(as.numeric(number), na.rm = TRUE),
+    percent = sum(as.numeric(percent), na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  rename(variable = variable)
 
-closures <-   read.csv("~/Library/CloudStorage/OneDrive-Nexus365/Documents/Children's Care Homes Project/CQC_API_Materials/Data/complete inspection and location data_ben_feb2025v2.csv")%>%
+final_df <- rbind(final_df, rejig)
+
+
+write.csv(final_df, "~/Library/CloudStorage/OneDrive-Nexus365/Documents/Github/Github_new/Care_Entries_Data/Data/clean/final_data.csv")
+
 
