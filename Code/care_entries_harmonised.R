@@ -467,6 +467,9 @@ final_df <- final_df %>%
   dplyr::mutate(variable = ifelse(variable=="Total" & subcategory=="Taken into care", "Total children", variable))
 
 
+final_df <- final_df %>%
+  dplyr::filter(!(geography_name=="DORSET" &number=="z"))
+
 write.csv(final_df, "~/Library/CloudStorage/OneDrive-Nexus365/Documents/Github/Github_new/Care_Entries_Data/Data/clean/final_data.csv")
 
 
