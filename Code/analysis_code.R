@@ -14,11 +14,9 @@ michelle <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Ent
 entries <- df %>%
   dplyr::filter(
     (variable=="Total children"& geography_scale=="NATIONAL")|
-      (variable=="Total"& subcategory=="Taken into care"& geography_scale=="NATIONAL")|
                  (variable=="Under 19_Total"& geography_scale=="NATIONAL")|
       (category=="Harmonisation data")
                 )%>%
-  dplyr::mutate(variable = ifelse(variable=="Total", "Total children", variable))%>%
   dplyr::select(year, variable, number)%>%
   tidyr::pivot_wider(id_cols = "year", names_from = "variable", values_from = "number")%>%
   dplyr::rename(updated_new_children = `Children starting to be looked after during the year`,
