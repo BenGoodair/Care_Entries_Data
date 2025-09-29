@@ -27,15 +27,18 @@ entries <- df %>%
 
 plot_df <- full_join(entries, michelle)
 
-ggplot(plot_df, aes(x=year))+
+plots <- ggplot(plot_df, aes(x=year))+
   geom_line(aes(y=michelle_new_children), colour = "#7F1734")+
   geom_line(aes(y=as.numeric(updated_new_children)), colour = "Navy")+
   theme_bw()+
   labs(title = "Harmonised children starting to be looked after in England",
-       subtitle = "Claret = Michelle's data; Navy = updated values with overlap",
+       subtitle = "Claret = Michelle's data; Navy = updated values (unrounded) with period overlap",
        x = "Year",
        y = "Children starting to be looked after in England")+
   coord_cartesian(xlim = c(1970,2024))
+
+ggsave(plot = plots,filename =  "~/Library/CloudStorage/OneDrive-Nexus365/Documents/Github/Github_new/Care_Entries_Data/Figures/harmonised_long_trend.png", dpi = 900, width = 14, height = 8)
+
 
 ggplot(plot_df%>%dplyr::filter(year>2010), aes(x=year))+
   geom_line(aes(y=ben_child_per), colour = "Navy")+
@@ -51,7 +54,7 @@ ggplot(plot_df%>%dplyr::filter(year>2010), aes(x=year))+
 
 ####care entries by geography####
 plot_df <- df %>%
-  dplyr::filter(variable=="All children taken into care"| variable=="Under 19_Total",
+  dplyr::filter(variable=="Total children"| variable=="Under 19_Total",
                 geography_scale=="LOCAL AUTHORITY")%>%
   dplyr::select(year, variable, number, geography_name)%>%
   tidyr::pivot_wider(id_cols = c("year", "geography_name"), names_from = "variable", values_from = "number")%>%
@@ -124,6 +127,7 @@ p <- ggplot(plot_df, aes(x = year, group = geography_name)) +
 # If you prefer a legend and no direct labels, set legend.position = "right" and remove geom_text_repel
 print(p)
 
+ggsave(plot = p,filename =  "~/Library/CloudStorage/OneDrive-Nexus365/Documents/Github/Github_new/Care_Entries_Data/Figures/la_trends.png", dpi = 900, width = 14, height = 8)
 
   
 
@@ -204,6 +208,7 @@ p2 <- ggplot(sii_by_year, aes(x = year, y = sii)) +
 combined <- p1 / p2 + plot_layout(heights = c(1, 0.9))
 print(combined)
 
+ggsave(plot = combined,filename =  "~/Library/CloudStorage/OneDrive-Nexus365/Documents/Github/Github_new/Care_Entries_Data/Figures/inequalities.png", dpi = 900, width = 10, height = 12)
 
 
 
@@ -212,7 +217,7 @@ print(combined)
 plot_df <- df %>%
   dplyr::filter(variable=="Female"| variable=="16 years and over"|variable=="N1. Abuse or neglect"|
                   variable=="Voluntary agreement under S20"|variable=="Unaccompanied asylum-seeking children"|
-                  variable=="Police protection in LA accommodation"| variable=="Male"|
+                  variable=="Full care order"| variable=="Male"|
                   variable=="Interim care order"| variable=="Not taken into care"|
                   variable=="N5. Family dysfunction"| variable == "N8. Absent parenting"|
                   variable=="1 to 4 years"| variable=="5 to 9 years"| variable=="10 to 15 years"|
@@ -233,22 +238,52 @@ plot_df <- plot_df %>%
   rename(
     age_over_16 = `16 years and over`,
     age_under_1 = `Under 1 year`,
+    age_1_to_4 = `1 to 4 years`,
+    age_5_to_9 = `5 to 9 years`,
+    age_10_to_15 = `10 to 15 years`,
+    
     abuse_or_neglect = `N1. Abuse or neglect`,
+    parental_illness = `N3. Parental illness or disability`,
+    absent_parenting = `N8. Absent parenting`,
+    socially_unacceptable_behav = `N6. Socially unacceptable behaviour`,
+    family_dysfunction = `N5. Family dysfunction`,
+    
     female = `Female`,
-    s20_vol = `Voluntary agreement under S20`,
+    male = `Male`,
+    
+    voluntary_agreement = `Voluntary agreement under S20`,
+    full_care_order = `Full care order`,
+    intermin_care_order = `Interim care order`,
+
     taken_into_care = `All children taken into care`,
+    not_taken_into_care = `Not taken into care`,
+    
     uasc = `Unaccompanied asylum-seeking children`
   )%>%
-  dplyr::mutate(over16 = as.numeric(over16),
-                under1 = as.numeric(under1),
+  dplyr::mutate(age_over_16 = as.numeric(age_over_16),
+                age_under_1 = as.numeric(age_under_1),
+                age_5_to_9 = as.numeric(age_5_to_9),
+                age_1_to_4 = as.numeric(age_1_to_4),
+                age_10_to_15 = as.numeric(age_10_to_15),
+                parental_illness = as.numeric(parental_illness),
+                absent_parenting = as.numeric(absent_parenting),
+                socially_unacceptable_behav = as.numeric(socially_unacceptable_behav),
+                family_dysfunction = as.numeric(family_dysfunction),
+                male = as.numeric(male),
+                full_care_order = as.numeric(full_care_order),
+                intermin_care_order = as.numeric(intermin_care_order),
+                not_taken_into_care = as.numeric(not_taken_into_care),
                 abuse_or_neglect = as.numeric(abuse_or_neglect),
                 female = as.numeric(female),
-                s20_vol = as.numeric(s20_vol),
+                voluntary_agreement = as.numeric(voluntary_agreement),
                 taken_into_care = as.numeric(taken_into_care),
                 uasc = as.numeric(uasc))
 
 # --- convert to long format for plotting ---
-vars <- c("over16","under1","abuse_or_neglect","female","s20_vol","taken_into_care","uasc")
+vars <- c("age_under_1","age_1_to_4","age_5_to_9","age_10_to_15","age_over_16","female","male",
+          "uasc","taken_into_care","voluntary_agreement","intermin_care_order","full_care_order","socially_unacceptable_behav",
+          "absent_parenting","family_dysfunction","parental_illness"
+)
 
 plot_df_long <- plot_df %>%
   mutate(year = as.integer(year)) %>%
@@ -278,12 +313,7 @@ summary_df <- plot_df_long %>%
 
 # --- Plot ---
 p <- ggplot() +
-  # grey thin lines for each LA to show trajectories (context)
-  geom_line(
-    data = plot_df_long,
-    aes(x = year, y = value, group = geography_name),
-    colour = "grey80", size = 0.4, alpha = 0.6
-  ) +
+
   # ribbon: IQR (25th to 75th)
   geom_ribbon(
     data = summary_df,
@@ -308,7 +338,7 @@ p <- ggplot() +
     aes(x = year, y = mean),
     colour = "steelblue", size = 1.8
   ) +
-  facet_wrap(~ metric, scales = "free_y", ncol = 2, labeller = labeller(metric = function(x) {
+  facet_wrap(~ metric, scales = "fixed", ncol = 4, labeller = labeller(metric = function(x) {
     # prettier labels: convert underscores to spaces, capitalise
     sapply(x, function(z) tools::toTitleCase(gsub("_", " ", z)))
   })) +
@@ -317,20 +347,18 @@ p <- ggplot() +
     x = "Year",
     y = NULL,
     title = "Trends in selected child-related metrics over time",
-    subtitle = "Grey lines = each local authority; blue line = mean; ribbon = IQR (darker) and ±1 SD (lighter)",
-    caption = "Data: your dataframe | Plot: ggplot2 + theme_bw()"
-  ) +
+    subtitle = "blue line = LA mean; ribbon = IQR (darker) and ±1 SD (lighter)"  ) +
   theme_bw(base_size = 13) +
   theme(
     strip.background = element_rect(fill = "grey98"),
-    strip.text = element_text(face = "bold", size = 11),
+    strip.text = element_text(face = "bold", size = 14),
     panel.grid.minor = element_blank(),
     panel.grid.major = element_line(size = 0.35),
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 11),
+    plot.title = element_text(face = "bold", size = 20),
+    plot.subtitle = element_text(size = 14),
     legend.position = "none"
   )
 
 # print and save
 print(p)
-
+ggsave(plot = p,filename =  "~/Library/CloudStorage/OneDrive-Nexus365/Documents/Github/Github_new/Care_Entries_Data/Figures/demographics.png", dpi = 900, width = 20, height = 14)
