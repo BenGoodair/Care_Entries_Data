@@ -135,7 +135,7 @@ all_combined <- pop2 %>% group_by(year, lad_code, geography) %>% summarise(pop_s
 agegrp_tot   <- by_age %>% group_by(year, lad_code, geography, age_group) %>% summarise(pop_sum=sum(pop_sum), .groups="drop") %>% mutate(sex="All")
 under18_all      <- under18 %>% dplyr::select(-sex) %>% group_by(age_group, year, lad_code, geography) %>% summarise(pop_sum=sum(pop_sum), .groups="drop") %>% mutate(sex="All")
 
-pop2 <- bind_rows(by_age, under18, all_by_sex, all_combined, agegrp_tot) %>%
+pop2 <- bind_rows(by_age, under18, all_by_sex, all_combined, agegrp_tot, under18_all) %>%
   arrange(year, lad_code, geography, age_group, sex) %>%
   mutate(sex = replace_na(sex, "Unknown"), ageandsex = paste0(age_group, "_", sex))
 

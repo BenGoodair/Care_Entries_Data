@@ -8,7 +8,9 @@ df <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_D
 michelle <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/michelle_data.csv"))
 
 entries <- df %>%
-  dplyr::filter(variable=="Total", subcategory == "Age group", geography_scale=="NATIONAL",
+  dplyr::filter(
+    (variable=="Total"& subcategory == "Age group"& geography_scale=="NATIONAL")|
+                 (variable=="Under 18_Total"& geography_scale=="NATIONAL")
                 )
 
 
