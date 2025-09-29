@@ -99,7 +99,7 @@ by_age <- pop %>%
   group_by(year, sex, lad_code, geography, age_group) %>%
   summarise(pop_sum = sum(pop, na.rm=TRUE), .groups="drop")
 
-under18      <- pop %>% filter(age < 18) %>% group_by(year, sex, lad_code, geography) %>% summarise(pop_sum=sum(pop), .groups="drop") %>% mutate(age_group="Under 18")
+under18      <- pop %>% filter(age < 19) %>% group_by(year, sex, lad_code, geography) %>% summarise(pop_sum=sum(pop), .groups="drop") %>% mutate(age_group="Under 19")
 all_by_sex   <- pop %>% group_by(year, sex, lad_code, geography) %>% summarise(pop_sum=sum(pop), .groups="drop") %>% mutate(age_group="All ages")
 all_combined <- pop %>% group_by(year, lad_code, geography) %>% summarise(pop_sum=sum(pop), .groups="drop") %>% mutate(age_group="All ages", sex="All")
 agegrp_tot   <- by_age %>% group_by(year, lad_code, geography, age_group) %>% summarise(pop_sum=sum(pop_sum), .groups="drop") %>% mutate(sex="All")
@@ -129,7 +129,7 @@ by_age <- pop2 %>%
   group_by(year, lad_code, geography, age_group, sex) %>%
   summarise(pop_sum = sum(pop, na.rm=TRUE), .groups="drop")
 
-under18      <- pop2 %>% filter(age < 18) %>% group_by(year, lad_code, geography, sex) %>% summarise(pop_sum=sum(pop), .groups="drop") %>% mutate(age_group="Under 18")
+under18      <- pop2 %>% filter(age < 19 ) %>% group_by(year, lad_code, geography, sex) %>% summarise(pop_sum=sum(pop), .groups="drop") %>% mutate(age_group="Under 19")
 all_by_sex   <- pop2 %>% group_by(year, lad_code, geography, sex) %>% summarise(pop_sum=sum(pop), .groups="drop") %>% mutate(age_group="All ages")
 all_combined <- pop2 %>% group_by(year, lad_code, geography) %>% summarise(pop_sum=sum(pop), .groups="drop") %>% mutate(age_group="All ages", sex="All")
 agegrp_tot   <- by_age %>% group_by(year, lad_code, geography, age_group) %>% summarise(pop_sum=sum(pop_sum), .groups="drop") %>% mutate(sex="All")
