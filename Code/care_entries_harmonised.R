@@ -466,6 +466,8 @@ final_df <- rbind(final_df, rejig)
 final_df <- final_df %>%
   dplyr::mutate(variable = ifelse(variable=="Total" & subcategory=="Taken into care", "Total children", variable))
 
+final_df <- final_df %>%
+  dplyr::mutate(variable = ifelse(variable=="Interm care order" , "Interim care order", variable))
 
 final_df <- final_df %>%
   dplyr::filter(!(geography_name=="DORSET" &number=="z"))
