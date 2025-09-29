@@ -5,6 +5,13 @@ pacman::p_load(devtools,np,lazyeval, hmisc,janitor,interp, lmtest,gt, modelsumma
 df <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Clean/final_data.csv"))
 
 ####Harmonising Michelle's graph####
+michelle <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/Care_Entries_Data/refs/heads/main/Data/Raw/michelle_data.csv"))
+
+entries <- df %>%
+  dplyr::filter(variable=="Total", subcategory == "Age group", geography_scale=="NATIONAL",
+                )
+
+
 
 
 ####care entries by geography####
