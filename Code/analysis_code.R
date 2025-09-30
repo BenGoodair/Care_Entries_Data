@@ -362,3 +362,133 @@ p <- ggplot() +
 # print and save
 print(p)
 ggsave(plot = p,filename =  "~/Library/CloudStorage/OneDrive-Nexus365/Documents/Github/Github_new/Care_Entries_Data/Figures/demographics.png", dpi = 900, width = 20, height = 14)
+
+
+
+
+####care entries by rurality####
+plot_df <- df %>%
+  dplyr::filter(variable=="Total children"| variable=="Under 19_Total"|variable=="Rural.Urban.Classification.2011..6.fold."|
+                  variable=="Population density (people per hectare)",
+                geography_scale=="LOCAL AUTHORITY")%>%
+  dplyr::select(year, variable, number, geography_name)%>%
+  tidyr::pivot_wider(id_cols = c("year", "geography_name"), names_from = "variable", values_from = "number")%>%
+  dplyr::mutate(child_per = as.numeric(`Total children`)/(as.numeric(`Under 19_Total`)/100000))
+
+plot_df <- plot_df %>% filter(!is.na(Rural.Urban.Classification.2011..6.fold.), !is.na(geography_name), !is.na(child_per))%>%dplyr::filter(geography_name!="CITY OF LONDON")
+
+
+p1 <- ggplot(plot_df, aes(x = year, group = geography_name)) +
+  # background lines for all regions
+  geom_line(aes(y = child_per), colour = "grey80", size = 0.5, alpha = 0.7) +
+  facet_wrap(~Rural.Urban.Classification.2011..6.fold.)+
+  
+  # scales, theme and labels
+  scale_colour_manual(values = setNames(rep(pal, length.out = length(top_regions)), top_regions)) +
+  scale_x_continuous(breaks = pretty(plot_df$year, n = 8)) +
+  scale_y_continuous(labels = label_number(accuracy = 1), expand = expansion(mult = c(0.02, 0.12))) +
+  
+  labs(
+    title = "Variation in children starting to be looked after",
+    subtitle = paste0("All LAs shown (grey); top ", top_n, " LAs by mean highlighted"),
+    x = "Year",
+    y = "Children starting to be looked after\n(per 100,000k under 19)",
+  ) +
+  theme_bw(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 11),
+    axis.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    legend.position = "none")            # legend hidden because labels are on pl  )
+
+# If you prefer a legend and no direct labels, set legend.position = "right" and remove geom_text_repel
+print(p1)
+
+
+# tidy column names (adapt if your names already match)
+df2 <- plot_df %>%
+  rename(
+    pop_under19 = `Under 19_Total`,
+    rural_urban = `Rural.Urban.Classification.2011..6.fold.`,
+    pop_density = `Population density (people per hectare)`
+  ) %>%
+  mutate(
+    year = as.integer(year),
+    pop_density = as.numeric(pop_density),
+    child_per = as.numeric(child_per)
+  )
+
+# compute per-LA slope of child_per ~ year (require at least 2 years of data)
+slopes_by_la <- df2 %>%
+  filter(!is.na(year), !is.na(child_per)) %>%
+  group_by(geography_name) %>%
+  filter(n() >= 2) %>%                        # keep only LAs with >=2 observations
+  nest() %>%
+  mutate(
+    fit = map(data, ~ tryCatch(lm(child_per ~ year, data = .x), error = function(e) NULL)),
+    tidy = map(fit, ~ if(!is.null(.x)) broom::tidy(.x) else tibble(term=NA, estimate=NA, std.error=NA)),
+    slope = map_dbl(tidy, ~ {
+      row <- .x %>% filter(term == "year")
+      if (nrow(row) == 1) row$estimate else NA_real_
+    }),
+    slope_se = map_dbl(tidy, ~ {
+      row <- .x %>% filter(term == "year")
+      if (nrow(row) == 1) row$std.error else NA_real_
+    })
+  ) %>%
+  # compute mean population density for each LA (across years if repeated)
+  mutate(mean_density = map_dbl(data, ~ mean(.x$pop_density, na.rm = TRUE)),
+         rural_urban = map_chr(data, ~ {
+           # take most common category if available, else NA
+           x <- .x$rural_urban
+           if (all(is.na(x))) NA_character_ else names(sort(table(x), decreasing = TRUE))[1]
+         })) %>%
+  select(geography_name, slope, slope_se, mean_density, rural_urban) %>%
+  ungroup()
+
+
+# choose points to label: largest absolute slopes (top 6)
+label_df <- slopes_by_la %>%
+  filter(!is.na(slope), !is.na(mean_density)) %>%
+  arrange(desc(abs(slope))) %>%
+  slice_head(n = 6)
+
+# scatter plot
+p <- ggplot(slopes_by_la, aes(x = mean_density, y = slope)) +
+  # points coloured by rural/urban category (if available)
+  geom_point(aes(colour = rural_urban), size = 3, alpha = 0.85) +
+  # smoothed trend (loess) to show general relation
+  geom_smooth(method = "lm", se = TRUE, colour = "navy", size = 0.9, formula = y ~ x) +
+  # highlight and label a few outliers
+  geom_label_repel(
+    data = label_df,
+    aes(label = geography_name),
+    size = 3.2,
+    min.segment.length = 0,
+    box.padding = 0.3
+  ) +
+  scale_x_continuous(
+    name = "Mean population density (people per hectare)",
+    labels = comma_format(accuracy = 0.1)
+  ) +
+  labs(
+    y = "Average yearly change in children starting to be looked after",
+    title = "Average annual change in children starting care vs mean population density",
+    colour = "Rural/Urban"
+  ) +
+  theme_bw(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.title = element_text(size = 10),
+    legend.position = "bottom"
+  )+
+  geom_hline(yintercept = 0, linetype = "dashed")
+
+
+print(p)
+
+combined <- p / p1 + plot_layout(heights = c(1, 0.9))
+
+
+ggsave(plot = combined,filename =  "~/Library/CloudStorage/OneDrive-Nexus365/Documents/Github/Github_new/Care_Entries_Data/Figures/la_trends_rurality.png", dpi = 900, width = 10, height = 15)
