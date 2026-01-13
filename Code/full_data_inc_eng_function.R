@@ -17,9 +17,10 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
-                  subcategory = age,
-                  variable = accommodation_suitability)%>% #rename variables
+                  percent = care_leaver_percent,
+                  number = care_leaver_count,
+                  subcategory = care_leaver_age,
+                  variable = breakdown)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
     dplyr::mutate(category = "care leavers")
@@ -33,9 +34,10 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
-                  subcategory = age,
-                  variable = accommodation_type)%>% #rename variables
+                  percent = care_leaver_percent,
+                  number = care_leaver_count,
+                  subcategory = care_leaver_age,
+                  variable = breakdown)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
     dplyr::mutate(category = "care leavers")
@@ -50,9 +52,10 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
-                  subcategory = age,
-                  variable = activity)%>% #rename variables
+                  percent = care_leaver_percent,
+                  number = care_leaver_count,
+                  subcategory = care_leaver_age,
+                  variable = breakdown)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
     dplyr::mutate(category = "care leavers")
@@ -65,9 +68,10 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
-                  subcategory = age,
-                  variable = in_touch)%>% #rename variables
+                  percent = care_leaver_percent,
+                  number = care_leaver_count,
+                  subcategory = care_leaver_age,
+                  variable = breakdown)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
     dplyr::mutate(category = "care leavers")
@@ -81,9 +85,10 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
-                  subcategory = age,
-                  variable = stay_put)%>% #rename variables
+                  percent = care_leaver_percent,
+                  number = care_leaver_count,
+                  subcategory = care_leaver_age,
+                  variable = breakdown)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
     dplyr::mutate(category = "care leavers")
@@ -98,14 +103,15 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  variable = cla_group)%>% #rename variables
+                  number = children_count,
+                  variable = breakdown)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
     dplyr::mutate(category = "child characteristics",
                   subcategory = "short term placements")
   
   
-  adopted_during <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated26/la_children_who_ceased_during_the_year_sgo_adoption.csv"),
+  adopted_during <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated25/data/la_children_who_ceased_during_the_year_sgo_adoption.csv"),
                              colClasses = "character")%>%
     dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #        dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
@@ -130,8 +136,9 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
-                  subcategory = cla_group,
+                  percent = children_percent,
+                  number = children_count,
+                  subcategory = breakdown,
                   variable = characteristic)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
@@ -147,8 +154,9 @@ create_characteristics_data <- function(){
                   percent = NA)%>%
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
+                  number = number, 
                   LA.Number=old_la_code,
-                  variable = CLA_group)%>% #rename variables
+                  variable = missing_status)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
     dplyr::mutate(category = "child characteristics",
@@ -156,7 +164,7 @@ create_characteristics_data <- function(){
   
   
   
-  stability <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated26/la_cla_placement_stability.csv"),
+  stability <- read.csv(curl("https://raw.githubusercontent.com/BenGoodair/childrens_social_care_data/main/Raw_Data/LA_level/Children_Placement_Characteristics/post_2017_updated26/LA_CLA_placement_stability.csv"),
                         colClasses = "character")%>%
     dplyr::mutate_all(~ str_replace(., ",", ""))%>% mutate(la_name = coalesce(na_if(la_name, ""), na_if(region_name, ""), country_name)) %>%
 #    dplyr::filter(geographic_level=="Local authority")%>% # keep only LAs
@@ -164,8 +172,9 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
+                  percent = children_percent,
                   variable = placement_stability,
+                  number = children_count,
                   subcategory = cla_group)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
@@ -180,8 +189,9 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
-                  subcategory = cla_group,
+                  percent = children_percent,
+                  number = children_count,
+                  subcategory = breakdown,
                   variable = characteristic)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
@@ -196,8 +206,9 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
-                  subcategory = cla_group,
+                  percent = children_percent,
+                  number = children_count,
+                  subcategory = breakdown,
                   variable = characteristic)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
@@ -213,8 +224,9 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
-                  percent = percentage,
-                  subcategory = cla_group,
+                  percent = children_percent,
+                  number = children_count,
+                  subcategory = breakdown,
                   variable = characteristic)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
@@ -228,6 +240,7 @@ create_characteristics_data <- function(){
     dplyr::rename(LA_Name= la_name,
                   LA_Code=new_la_code,
                   LA.Number=old_la_code,
+                  number = children_count,
                   variable = characteristic)%>% #rename variables
     dplyr::select(-time_period, -time_identifier, -geographic_level, -country_code, 
                   -country_name, -region_code, -region_name)%>% #remove empty column
